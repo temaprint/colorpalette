@@ -1,0 +1,79 @@
+---
+import PaletteLayout from '../../layouts/PaletteLayout.astro';
+import { Droplet } from 'lucide-react';
+import { getAllColors } from '../../lib/colors';
+import { getAllPalettes } from '../../lib/palettes';
+
+export async function getStaticPaths() {
+  const palettes = await getAllPalettes();
+  return palettes.map(palette => ({
+    params: { id: palette.id },
+    props: { palette },
+  }));
+}
+
+const { palette } = Astro.props;
+const colors = await getAllColors();
+
+const paletteColors = palette.colors
+  .map(colorSlug => colors.find(c => c.slug === colorSlug))
+  .filter(Boolean);
+---
+
+<PaletteLayout title={`${palette.name} - Palette Details`}>
+  <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+    <div class="flex h-48">
+      {paletteColors.map(color => color && (
+        <div
+          class="flex-1 transition-all duration-300 hover:flex-[1.2]"
+          style={{ backgroundColor: color.hexCode }}
+        />
+      ))}
+    </div>
+    <div class="p-6">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">
+        {palette.name}
+      </h1>
+      <p class="text-gray-600 mb-4">{palette.description}</p>
+      <div class="flex flex-wrap gap-2">
+        {palette.tags.map(tag => (
+          <span class="tag">
+            {tag}
+          </span>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {paletteColors.map(color => color && (
+      <a
+        href={`/colors/${color.slug}`}
+        class="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+      >
+        <div
+          class="h-48 w-full transition-transform group-hover:scale-105"
+          style={{ backgroundColor: color.hexCode }}
+        />
+        <div class="p-4">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center">
+              <Droplet className="h-5 w-5 mr-2" style={{ color: color.hexCode }} />
+              <h2 class="text-xl font-semibold text-gray-900">{color.name}</h2>
+            </div>
+            <code class="px-3 py-1 bg-gray-100 rounded-md text-sm font-mono text-gray-600">
+              {color.hexCode}
+            </code>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            {color.tags.map(tag => (
+              <span class="tag">
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      </a>
+    ))}
+  </div>
+</PaletteLayout>

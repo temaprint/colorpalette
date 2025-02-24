@@ -1,0 +1,138 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import { Palette, Droplet } from 'lucide-react';
+import { getAllColors } from '../lib/colors';
+import { getAllPalettes } from '../lib/palettes';
+
+const colors = await getAllColors();
+const palettes = await getAllPalettes();
+
+// Get first 3 palettes for showcase
+const featuredPalettes = palettes.slice(0, 3);
+// Get first 12 colors for the grid
+const displayColors = colors.slice(0, 12);
+---
+
+<Layout title="Color Palettes - Home">
+  <Navbar />
+  <main class="container mx-auto px-4 py-12">
+    <div class="max-w-7xl mx-auto">
+      {/* Hero Section */}
+      <div class="text-center mb-16">
+        <h1 class="text-5xl font-bold text-gray-900 mb-6">
+          Discover Beautiful Color Palettes
+        </h1>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+          Explore our collection of carefully curated colors and palettes for your next project
+        </p>
+      </div>
+
+      {/* Featured Palettes Section */}
+      <section class="mb-24">
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="text-3xl font-bold text-gray-900">Featured Palettes</h2>
+          <a
+              href="/palettes"
+              class="text-indigo-600 hover:text-indigo-500 font-medium flex items-center gap-2 text-lg transition-colors duration-200"
+          >
+            View all palettes
+            <Palette className="h-5 w-5" />
+          </a>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {featuredPalettes.map(palette => {
+            const paletteColors = palette.colors
+                .map(colorSlug => colors.find(c => c.slug === colorSlug))
+                .filter(Boolean);
+
+            return (
+                <a
+                    href={`/palettes/${palette.id}`}
+                    class="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300"
+                >
+                  <div class="relative">
+                    <div class="flex h-40">
+                      {paletteColors.map(color => color && (
+                          <div
+                              class="flex-1 transition-transform group-hover:scale-105 duration-500"
+                              style={{ backgroundColor: color.hexCode }}
+                          />
+                      ))}
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                  <div class="p-6">
+                    <div class="flex items-center mb-3">
+                      <Palette className="h-6 w-6 text-indigo-600 mr-3" />
+                      <h3 class="text-xl font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors duration-200">
+                        {palette.name}
+                      </h3>
+                    </div>
+                    <p class="text-gray-600 mb-4 line-clamp-2">{palette.description}</p>
+                    <div class="flex flex-wrap gap-2">
+                      {palette.tags.map(tag => (
+                          <span class="px-3 py-1 bg-gray-100 text-sm text-gray-600 rounded-full">
+                        {tag}
+                      </span>
+                      ))}
+                    </div>
+                  </div>
+                </a>
+            );
+          })}
+          </div>
+          </section>
+
+          {/* Colors Section */}
+            <section>
+              <div class="flex items-center justify-between mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">Featured Colors</h2>
+                <a
+                    href="/colors"
+                    class="text-indigo-600 hover:text-indigo-500 font-medium flex items-center gap-2 text-lg transition-colors duration-200"
+                >
+                  Browse all colors
+                  <Droplet className="h-5 w-5" />
+                </a>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {displayColors.map(color => (
+                    <a
+                        href={`/colors/${color.slug}`}
+                        class="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300"
+                    >
+                      <div
+                          class="h-40 w-full transition-transform group-hover:scale-105 duration-500"
+                          style={{ backgroundColor: color.hexCode }}
+                      />
+                      <div class="p-5">
+                        <div class="flex items-center justify-between mb-3">
+                          <div class="flex items-center">
+                            <Droplet
+                                className="h-5 w-5 mr-2"
+                                style={{ color: color.hexCode }}
+                            />
+                            <h3 class="text-lg font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors duration-200">
+                              {color.name}
+                            </h3>
+                          </div>
+                          <code class="px-3 py-1 bg-gray-100 rounded-md text-sm font-mono text-gray-600">
+                            {color.hexCode}
+                          </code>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                          {color.tags.map(tag => (
+                              <span class="px-3 py-1 bg-gray-100 text-sm text-gray-600 rounded-full">
+                      {tag}
+                    </span>
+                          ))}
+                        </div>
+                      </div>
+                    </a>
+                ))}
+              </div>
+            </section>
+            </div>
+            </main>
+            </Layout>

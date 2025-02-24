@@ -1,0 +1,35 @@
+---
+import Layout from './Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import { ArrowLeft } from 'lucide-react';
+
+interface Props {
+  title: string;
+  backLink?: string;
+  backText?: string;
+}
+
+const { 
+  title,
+  backLink = "/colors",
+  backText = "Back to Colors"
+} = Astro.props;
+---
+
+<Layout title={title}>
+  <Navbar />
+  <main class="container mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto">
+      {backLink && (
+        <a
+          href={backLink}
+          class="inline-flex items-center text-primary-600 hover:text-primary-500 mb-6"
+        >
+          <ArrowLeft className="h-5 w-5 mr-2" />
+          {backText}
+        </a>
+      )}
+      <slot />
+    </div>
+  </main>
+</Layout>

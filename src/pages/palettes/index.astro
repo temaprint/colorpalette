@@ -1,0 +1,75 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/Navbar.astro';
+import { Palette, Search } from 'lucide-react';
+import { getAllColors } from '../../lib/colors';
+import { getAllPalettes } from '../../lib/palettes';
+
+const colors = await getAllColors();
+const palettes = await getAllPalettes();
+---
+
+<Layout title="Palettes - Browse All">
+  <Navbar />
+  <main class="container py-12">
+    <div class="max-w-7xl mx-auto">
+      <header class="mb-12">
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">Color Palettes</h1>
+        <p class="text-xl text-gray-600 max-w-2xl">
+          Discover harmonious color combinations curated for various design needs. Each palette is carefully crafted to work beautifully together.
+        </p>
+      </header>
+
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {palettes.map(palette => {
+          const paletteColors = palette.colors
+              .map(colorSlug => colors.find(c => c.slug === colorSlug))
+              .filter(Boolean);
+
+          return (
+              <a
+                  href={`/palettes/${palette.id}`}
+                  class="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300"
+              >
+                {/* Color Strip */}
+                <div class="relative">
+                  <div class="flex h-40">
+                    {paletteColors.map(color => color && (
+                        <div
+                            class="flex-1 transition-transform group-hover:scale-105 duration-500"
+                            style={{ backgroundColor: color.hexCode }}
+                        />
+                    ))}
+                  </div>
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+
+                {/* Content */}
+                <div class="p-6">
+                  <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center">
+                      <Palette className="h-6 w-6 text-primary-600 mr-3" />
+                      <h2 class="text-xl font-semibold text-gray-900 group-hover:text-primary-600 transition-colors duration-200">
+                        {palette.name}
+                      </h2>
+                    </div>
+                  </div>
+                  <p class="text-gray-600 mb-4">{palette.description}</p>
+
+                  {/* Tags */}
+                  <div class="flex flex-wrap gap-2">
+                    {palette.tags.map(tag => (
+                        <span class="tag">
+                      {tag}
+                    </span>
+                    ))}
+                  </div>
+                </div>
+              </a>
+          );
+        })}
+      </div>
+    </div>
+  </main>
+</Layout>

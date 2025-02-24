@@ -1,0 +1,64 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/Navbar.astro';
+import { ArrowLeft, Calendar, Droplet } from 'lucide-react';
+import { getAllArticles } from '../../lib/articles';
+
+export async function getStaticPaths() {
+  const articles = await getAllArticles();
+  return articles.map(article => ({
+    params: { slug: article.slug },
+    props: { article },
+  }));
+}
+
+const { article } = Astro.props;
+---
+
+<Layout title={article.title}>
+  <Navbar />
+  <main class="container py-12">
+    <div class="max-w-4xl mx-auto">
+      <a
+        href="/articles"
+        class="inline-flex items-center text-primary-600 hover:text-primary-500 mb-8"
+      >
+        <ArrowLeft className="h-5 w-5 mr-2" />
+        Back to Articles
+      </a>
+
+      <article class="bg-white rounded-2xl shadow-lg overflow-hidden">
+        {/* Color Header */}
+        <div
+          class="h-48 w-full relative"
+          style={{ backgroundColor: article.hexCode }}
+        >
+          <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+        </div>
+
+        <div class="p-8">
+          <div class="flex items-center gap-4 text-gray-600 mb-6">
+            <div class="flex items-center">
+              <Calendar className="h-5 w-5 mr-2" />
+              <time datetime={article.date}>
+                {new Date(article.date).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </time>
+            </div>
+            <div class="flex items-center">
+              <Droplet className="h-5 w-5 mr-2" style={{ color: article.hexCode }} />
+              <code class="font-mono">{article.hexCode}</code>
+            </div>
+          </div>
+
+          <div class="prose prose-lg prose-primary max-w-none">
+            <Fragment set:html={article.content} />
+          </div>
+        </div>
+      </article>
+    </div>
+  </main>
+</Layout>

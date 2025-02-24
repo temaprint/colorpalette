@@ -1,0 +1,26 @@
+# Исключаем системные файлы
+.DS_Store
+Thumbs.db
+GenerateArticlesMd.js
+GenerateColorMd.js
+colors.txt
+articles.txt
+
+# Игнорируем зависимости и сборку (если используешь Node.js, Python или другие языки)
+node_modules/
+venv/
+dist/
+build/
+
+# Файлы редакторов и IDE
+.idea/
+.vscode/
+*.swp
+
+# Логи и временные файлы
+*.log
+*.tmp
+*.bak
+
+# Файлы настроек системы
+.env

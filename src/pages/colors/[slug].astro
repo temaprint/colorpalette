@@ -1,0 +1,204 @@
+---
+import ColorLayout from '../../layouts/ColorLayout.astro';
+import { Tag, Palette, Copy } from 'lucide-react';
+import { getAllColors } from '../../lib/colors';
+
+export async function getStaticPaths() {
+  const colors = await getAllColors();
+  return colors.map(color => ({
+    params: { slug: color.slug },
+    props: { color },
+  }));
+}
+
+const { color } = Astro.props;
+const colors = await getAllColors();
+
+// Find colors that share tags with the current color
+const relatedColors = colors
+    .filter(c => c.slug !== color.slug)
+    .map(c => ({
+      ...c,
+      matchingTags: c.tags.filter(tag => color.tags.includes(tag))
+    }))
+    .filter(c => c.matchingTags.length > 0)
+    .sort((a, b) => b.matchingTags.length - a.matchingTags.length)
+    .slice(0, 4);
+
+// Function to get contrasting text color
+function getContrastColor(hexColor: string) {
+  // Convert hex to RGB
+  const r = parseInt(hexColor.slice(1, 3), 16);
+  const g = parseInt(hexColor.slice(3, 5), 16);
+  const b = parseInt(hexColor.slice(5, 7), 16);
+
+  // Calculate relative luminance
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+  return luminance > 0.5 ? '#000000' : '#FFFFFF';
+}
+
+const textColor = getContrastColor(color.hexCode);
+---
+
+<ColorLayout title={`${color.name} - Color Details`}>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="lg:col-span-2">
+      <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+        <div
+            class="h-64 w-full transition-all duration-300 hover:h-72 relative"
+            style={{ backgroundColor: color.hexCode }}
+        >
+          <div class="absolute inset-0 flex items-center justify-center">
+            <h1
+                class="text-4xl font-bold"
+                style={{ color: textColor }}
+            >
+              {color.name}
+            </h1>
+          </div>
+        </div>
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-4">
+              <div
+                  class="w-12 h-12 rounded-lg shadow-inner"
+                  style={{ backgroundColor: color.hexCode }}
+              ></div>
+              <code class="px-3 py-1 bg-gray-100 rounded-md font-mono text-sm select-all cursor-pointer">
+                {color.hexCode}
+              </code>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            {color.tags.map(tag => (
+                <a
+                    href={`/palettes/${tag.toLowerCase()}`}
+                    class="inline-flex items-center px-3 py-1 bg-gray-100 hover:bg-gray-200
+                       text-gray-600 rounded-full transition-colors"
+                >
+                  <Tag className="h-4 w-4 mr-1" />
+                  {tag}
+                </a>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-lg p-8">
+        <article class="prose prose-lg prose-primary max-w-none">
+          <Fragment set:html={color.content} />
+        </article>
+      </div>
+    </div>
+
+    <div class="lg:col-span-1 space-y-8">
+      {/* Color Preview Card */}
+      <div class="bg-white rounded-xl shadow-lg p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Color Preview</h2>
+        <div class="space-y-6">
+          {/* Text Examples */}
+          <div>
+            <h3 class="text-sm font-medium text-gray-500 mb-3">Text Examples</h3>
+            <div class="space-y-2">
+              <p style={{ color: color.hexCode }} class="text-3xl font-bold">
+                Large Heading
+              </p>
+              <p style={{ color: color.hexCode }} class="text-xl">
+                Medium Text
+              </p>
+              <p style={{ color: color.hexCode }} class="text-base">
+                Regular paragraph text
+              </p>
+            </div>
+          </div>
+
+          {/* Background Examples */}
+          <div>
+            <h3 class="text-sm font-medium text-gray-500 mb-3">Background Examples</h3>
+            <div class="space-y-3">
+              <div
+                  style={{ backgroundColor: color.hexCode }}
+                  class="h-24 rounded-lg shadow-inner flex items-center justify-center"
+              >
+                <span style={{ color: textColor }} class="font-medium">
+                  Primary Background
+                </span>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div
+                    style={{ backgroundColor: color.hexCode + '80' }}
+                    class="h-16 rounded-lg shadow-inner flex items-center justify-center"
+                >
+                  <span class="text-sm font-medium">50% Opacity</span>
+                </div>
+                <div
+                    style={{ backgroundColor: color.hexCode + '40' }}
+                    class="h-16 rounded-lg shadow-inner flex items-center justify-center"
+                >
+                  <span class="text-sm font-medium">25% Opacity</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Color Values */}
+          <div>
+            <h3 class="text-sm font-medium text-gray-500 mb-3">Color Values</h3>
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-600">HEX</span>
+                <code class="px-2 py-1 bg-gray-100 rounded text-sm font-mono select-all">
+                  {color.hexCode}
+                </code>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-600">RGB</span>
+                <code class="px-2 py-1 bg-gray-100 rounded text-sm font-mono select-all">
+                  {`rgb(${parseInt(color.hexCode.slice(1,3), 16)}, ${parseInt(color.hexCode.slice(3,5), 16)}, ${parseInt(color.hexCode.slice(5,7), 16)})`}
+                </code>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Color Combinations */}
+      <div class="bg-white rounded-xl shadow-lg p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          <Palette className="h-5 w-5 mr-2" />
+          Color Combinations
+        </h2>
+        <div class="space-y-4">
+          {relatedColors.map(related => (
+              <a
+                  href={`/colors/${related.slug}`}
+                  class="block group"
+              >
+                <div class="flex items-center space-x-3">
+                  <div class="flex-1 h-12 rounded-lg grid grid-cols-2">
+                    <div
+                        class="rounded-l-lg"
+                        style={{ backgroundColor: color.hexCode }}
+                    />
+                    <div
+                        class="rounded-r-lg transition-transform group-hover:scale-105"
+                        style={{ backgroundColor: related.hexCode }}
+                    />
+                  </div>
+                  <div class="flex-1">
+                    <h3 class="font-medium text-gray-900 group-hover:text-primary-600">
+                      {related.name}
+                    </h3>
+                    <code class="text-sm text-gray-500">
+                      {related.hexCode}
+                    </code>
+                  </div>
+                </div>
+              </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</ColorLayout>
